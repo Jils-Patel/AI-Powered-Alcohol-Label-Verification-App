@@ -7,3 +7,4 @@ uploads/*
 !uploads/.gitkeep
 .DS_Store
 screenshots/
+smoke_test_video/
