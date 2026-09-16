@@ -5,6 +5,18 @@ against the corresponding COLA application in seconds instead of minutes,
 built for the take-home assessment described in
 [treasurytakehome-rgb/instructions](https://github.com/treasurytakehome-rgb/instructions).
 
+**Live demo:** https://ai-powered-alcohol-label-verification-app-z5v1.onrender.com
+
+> Hosted on Render's free tier, which spins the service down after periods
+> of inactivity. If it's been idle, the **first** request can take
+> 30-50 seconds to wake up — that's Render's cold start, not the app itself
+> (once warm, verification consistently runs in 2-4 seconds). Try the
+> `/healthz` endpoint first if you want to "wake" it before demoing.
+
+**Demo video:** [`demo/smoke_test_demo.webm`](demo/smoke_test_demo.webm) —
+a recorded walkthrough covering a clean match, a formatting-issue warning,
+a blurry/unreadable photo, and a batch upload with a CSV manifest.
+
 ## Why this approach
 
 The discovery notes point pretty directly at a vision-LLM pipeline rather
