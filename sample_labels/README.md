@@ -49,5 +49,5 @@ instructions), used to test the **Country of Origin** field:
 ## Batch mode
 Upload all four at once in the Batch Upload tab (no manifest needed to see
 extraction-only results), or use `label1.jpg` / `label2.jpg` / `label3.jpg`
-(identical copies, just renamed) together with `static/sample_manifest.csv`
-to see the full auto-filled comparison path.
+(identical copies, just renamed) together with `sample_manifest.csv` in this
+same folder to see the full auto-filled comparison path.
