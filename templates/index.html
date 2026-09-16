@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTB Label Verification Assistant</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">TTB</span>
+    <span class="brand-text">Label Verification Assistant</span>
+  </div>
+  <p class="tagline">Checks a label photo against the COLA application in seconds — flags anything that needs a human look.</p>
+</header>
+
+<main class="container">
+
+  <nav class="tabs" role="tablist" aria-label="Verification mode">
+    <button class="tab active" data-tab="single" role="tab" aria-selected="true">Single Label</button>
+    <button class="tab" data-tab="batch" role="tab" aria-selected="false">Batch Upload</button>
+  </nav>
+
+  <!-- SINGLE MODE -->
+  <section id="panel-single" class="panel active">
+    <form id="single-form" class="card">
+      <div class="dropzone" id="single-dropzone" tabindex="0" role="button" aria-label="Upload label photo">
+        <input type="file" id="single-file" name="image" accept="image/png,image/jpeg,image/webp" hidden required>
+        <div class="dropzone-content">
+          <p class="dz-title">Drop a label photo here, or click to choose a file</p>
+          <p class="dz-sub">JPG, PNG, or WEBP. A slightly angled or low-light photo is fine.</p>
+          <img id="single-preview" class="preview-img" hidden alt="Label preview">
+        </div>
+      </div>
+
+      <fieldset class="app-data">
+        <legend>What the COLA application says</legend>
+        <p class="hint">Enter the values submitted on the application. Leave blank to skip checking a field.</p>
+        <div class="grid-2">
+          <label>Brand Name
+            <input type="text" name="brand_name" placeholder="e.g. Silver Creek">
+          </label>
+          <label>Class / Type Designation
+            <input type="text" name="class_type" placeholder="e.g. Bourbon Whiskey">
+          </label>
+          <label>Alcohol Content
+            <input type="text" name="alcohol_content" placeholder="e.g. 13.5% ALC/VOL">
+          </label>
+          <label>Net Contents
+            <input type="text" name="net_contents" placeholder="e.g. 750 ML">
+          </label>
+        </div>
+        <label class="full-width">Producer Information
+          <input type="text" name="producer_info" placeholder="e.g. Bottled by Silver Creek Distillers, Louisville, KY">
+        </label>
+      </fieldset>
+
+      <button type="submit" class="btn-primary" id="single-submit">Verify Label</button>
+    </form>
+
+    <div id="single-result-area"></div>
+  </section>
+
+  <!-- BATCH MODE -->
+  <section id="panel-batch" class="panel">
+    <form id="batch-form" class="card">
+      <div class="dropzone" id="batch-dropzone" tabindex="0" role="button" aria-label="Upload label photos">
+        <input type="file" id="batch-files" name="images" accept="image/png,image/jpeg,image/webp" multiple hidden required>
+        <div class="dropzone-content">
+          <p class="dz-title">Drop multiple label photos here, or click to choose files</p>
+          <p class="dz-sub" id="batch-file-count">No files selected yet.</p>
+        </div>
+      </div>
+
+      <fieldset class="app-data">
+        <legend>Application data manifest (optional)</legend>
+        <p class="hint">
+          Upload a CSV with columns: <code>filename, brand_name, class_type, alcohol_content, net_contents, producer_info</code>.
+          The <code>filename</code> must match the image file name exactly. Skip this to only extract fields without comparison.
+        </p>
+        <input type="file" id="batch-manifest" name="manifest" accept=".csv">
+        <a href="{{ url_for('static', filename='sample_manifest.csv') }}" download class="sample-link">Download sample CSV</a>
+      </fieldset>
+
+      <button type="submit" class="btn-primary" id="batch-submit">Verify Batch</button>
+    </form>
+
+    <div id="batch-result-area"></div>
+  </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
