@@ -3,8 +3,7 @@ __pycache__/
 .venv/
 venv/
 .env
-uploads/*
-!uploads/.gitkeep
+uploads/
 .DS_Store
 screenshots/
 smoke_test_video/
