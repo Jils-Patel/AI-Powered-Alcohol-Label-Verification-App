@@ -13,7 +13,8 @@ built for the take-home assessment described in
 > (once warm, verification consistently runs in 2-4 seconds). Try the
 > `/healthz` endpoint first if you want to "wake" it before demoing.
 
-**Demo video:** [`demo/smoke_test_demo.webm`](demo/smoke_test_demo.webm) —
+**Demo video:** [Watch on Google Drive](https://drive.google.com/file/d/1xELBZKE8rbD0qf7OoUKzT9eU_kyhRrMP/view?usp=sharing)
+(also committed in-repo at [`demo/smoke_test_demo.webm`](demo/smoke_test_demo.webm)) —
 a recorded walkthrough covering a clean match, a formatting-issue warning,
 a blurry/unreadable photo, and a batch upload with a CSV manifest.
 
