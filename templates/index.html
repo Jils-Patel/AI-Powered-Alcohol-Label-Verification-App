@@ -54,6 +54,9 @@
         <label class="full-width">Producer Information
           <input type="text" name="producer_info" placeholder="e.g. Bottled by Silver Creek Distillers, Louisville, KY">
         </label>
+        <label class="full-width">Country of Origin <span class="hint-inline">(imports only — leave blank for domestic labels)</span>
+          <input type="text" name="country_of_origin" placeholder="e.g. Product of Scotland">
+        </label>
       </fieldset>
 
       <button type="submit" class="btn-primary" id="single-submit">Verify Label</button>
@@ -76,7 +79,7 @@
       <fieldset class="app-data">
         <legend>Application data manifest (optional)</legend>
         <p class="hint">
-          Upload a CSV with columns: <code>filename, brand_name, class_type, alcohol_content, net_contents, producer_info</code>.
+          Upload a CSV with columns: <code>filename, brand_name, class_type, alcohol_content, net_contents, producer_info, country_of_origin</code>.
           The <code>filename</code> must match the image file name exactly. Skip this to only extract fields without comparison.
         </p>
         <input type="file" id="batch-manifest" name="manifest" accept=".csv">

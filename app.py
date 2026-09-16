@@ -47,6 +47,7 @@ def api_verify():
         "alcohol_content": request.form.get("alcohol_content", "").strip(),
         "net_contents": request.form.get("net_contents", "").strip(),
         "producer_info": request.form.get("producer_info", "").strip(),
+        "country_of_origin": request.form.get("country_of_origin", "").strip(),
     }
 
     path = None
@@ -83,6 +84,7 @@ def api_verify_batch():
                         "alcohol_content": row.get("alcohol_content", "").strip(),
                         "net_contents": row.get("net_contents", "").strip(),
                         "producer_info": row.get("producer_info", "").strip(),
+                        "country_of_origin": row.get("country_of_origin", "").strip(),
                     }
         except Exception as exc:  # noqa: BLE001
             return jsonify({"error": f"Could not parse manifest CSV: {exc}"}), 400

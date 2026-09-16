@@ -38,14 +38,21 @@ Marcus mentioned.
 2. Optionally provide the values declared on the COLA application — by
    hand for a single label, or via a CSV manifest for a batch.
 3. The app extracts: brand name, class/type, alcohol content, net
-   contents, producer info, and the government warning statement.
+   contents, producer info, country of origin (imports only), and the
+   government warning statement — the full field list called out in the
+   instructions' "About TTB Label Requirements" section.
 4. Each field gets a verdict:
    - **Match** — extracted value agrees with the application.
    - **Needs Review** — close but not exact (e.g. punctuation/spacing
-     differences) — surfaced to a human rather than auto-rejected.
+     differences), or the model couldn't confidently read a field off a
+     low-quality photo — surfaced to a human rather than auto-rejected
+     or auto-failed.
    - **Mismatch** — meaningfully different, or the warning statement
      fails wording/formatting requirements.
-   - **Not Checked** — no application value was provided for that field.
+   - **Not Checked** — no application value was provided for that field
+     (expected for country of origin on most domestic labels).
+   - **Partial** (batch/overall only) — checked fields agree, but some
+     fields had no application value to compare against.
 5. Results, plus per-run processing time, render immediately; batch runs
    show a sortable table with an expandable per-label breakdown and CSV
    export.
@@ -103,6 +110,25 @@ cloud connections, a production rollout would need the OpenAI endpoint
 allow-listed (or the extraction call swapped for an in-VPC/Azure-hosted
 vision model) — noted here as a known gap for the prototype, not solved
 by it.
+
+## Assumptions and trade-offs
+
+- **27 CFR 16.21 is used as the canonical Government Warning text.** The
+  instructions describe the requirement (exact wording, all-caps + bold
+  lead-in) without pasting the statutory text itself, so the actual
+  wording is hardcoded from the real regulation rather than invented.
+- **Country of origin is only checked when declared.** It's legally
+  required for imports only, so a domestic label with no country of
+  origin printed is expected and shown as "Not Checked," not a defect.
+- **Fuzzy matching thresholds (97% / 80% / below) are a judgment call**,
+  tuned against the "STONE'S THROW" vs. "Stone's Throw" style case Dave
+  described — same brand, different casing/punctuation, shouldn't
+  auto-reject. A production version would want these thresholds
+  validated against a larger set of real labels, ideally with agent
+  feedback loop to tune them.
+- **Test labels are synthetically generated** (Pillow-rendered, plus one
+  matching the instructions' own "OLD TOM DISTILLERY" example) rather
+  than photographed, since no real label images were provided.
 
 ## Known limitations (prototype scope)
 

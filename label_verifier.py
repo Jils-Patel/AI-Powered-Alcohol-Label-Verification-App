@@ -42,8 +42,18 @@ FIELD_LABELS = {
     "alcohol_content": "Alcohol Content (ABV)",
     "net_contents": "Net Contents",
     "producer_info": "Producer Information",
+    "country_of_origin": "Country of Origin (imports)",
     "government_warning": "Government Warning Statement",
 }
+
+COMPARABLE_FIELDS = (
+    "brand_name",
+    "class_type",
+    "alcohol_content",
+    "net_contents",
+    "producer_info",
+    "country_of_origin",
+)
 
 EXTRACTION_PROMPT = """You are assisting a TTB (Alcohol and Tobacco Tax and Trade Bureau) \
 compliance agent in reading an alcohol beverage label photograph.
@@ -60,6 +70,7 @@ Return ONLY a single JSON object (no markdown fences, no commentary) with this s
   "alcohol_content": "<string or null, e.g. '13.5% ALC/VOL'>",
   "net_contents": "<string or null, e.g. '750 ML'>",
   "producer_info": "<string or null, the bottler/producer name and address as printed>",
+  "country_of_origin": "<string or null, e.g. 'Product of Scotland' -- only printed on imported products, so this will legitimately be null for most domestic labels>",
   "government_warning": "<string or null, the FULL warning statement text, transcribed verbatim including punctuation. You MUST start the string with the lead-in phrase exactly as printed (e.g. 'GOVERNMENT WARNING:') -- do not omit it or start mid-sentence>",
   "government_warning_all_caps": <true/false, whether 'GOVERNMENT WARNING:' is printed in all capital letters>,
   "government_warning_bold": <true/false, whether the words 'GOVERNMENT WARNING:' appear bold/heavier weight than surrounding text>,
@@ -185,7 +196,7 @@ def compare_fields(extracted, declared):
                producer_info -- government_warning is checked separately)
     """
     results = {}
-    for field in ("brand_name", "class_type", "alcohol_content", "net_contents", "producer_info"):
+    for field in COMPARABLE_FIELDS:
         expected = declared.get(field)
         found = extracted.get(field)
         if not expected:
