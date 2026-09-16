@@ -237,8 +237,10 @@ def verify_label(image_path, declared):
         overall = "mismatch"
     elif "review" in verdicts:
         overall = "review"
-    elif "no_data" in verdicts and verdicts.count("no_data") == len(verdicts):
+    elif verdicts.count("no_data") == len(verdicts):
         overall = "no_data"
+    elif "no_data" in verdicts:
+        overall = "partial"  # some fields matched, others had no application data to check
     else:
         overall = "match"
 

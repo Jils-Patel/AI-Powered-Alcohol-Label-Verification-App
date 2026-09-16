@@ -133,6 +133,7 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: var(-
 .badge.review { background: var(--amber-bg); color: var(--amber-fg); border-color: var(--amber-border); }
 .badge.mismatch { background: var(--red-bg); color: var(--red-fg); border-color: var(--red-border); }
 .badge.no_data { background: var(--gray-bg); color: var(--gray-fg); border-color: var(--gray-border); }
+.badge.partial { background: var(--green-bg); color: var(--green-fg); border-color: var(--green-border); }
 
 .field-row { border-top: 1px solid var(--border); padding: 12px 0; }
 .field-row:first-of-type { border-top: none; }

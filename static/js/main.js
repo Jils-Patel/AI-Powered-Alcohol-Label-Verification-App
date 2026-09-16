@@ -9,14 +9,20 @@ document.querySelectorAll(".tab").forEach((tab) => {
   });
 });
 
-const VERDICT_LABEL = { match: "Match", review: "Needs Review", mismatch: "Mismatch", no_data: "Not Checked" };
+const VERDICT_LABEL = { match: "Match", review: "Needs Review", mismatch: "Mismatch", no_data: "Not Checked", partial: "Partial" };
 
 function badge(verdict) {
   return `<span class="badge ${verdict}">${VERDICT_LABEL[verdict] || verdict}</span>`;
 }
 
 function overallBadgeText(overall) {
-  return { match: "All fields match", review: "Needs human review", mismatch: "Mismatch found", no_data: "No comparison data" }[overall] || overall;
+  return {
+    match: "All checked fields match",
+    review: "Needs human review",
+    mismatch: "Mismatch found",
+    no_data: "No application data provided",
+    partial: "Checked fields match — some fields had no application data to compare",
+  }[overall] || overall;
 }
 
 function renderFieldRow(key, field) {
