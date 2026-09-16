@@ -9,7 +9,7 @@ document.querySelectorAll(".tab").forEach((tab) => {
   });
 });
 
-const VERDICT_LABEL = { match: "Match", review: "Needs Review", mismatch: "Mismatch", no_data: "Not Checked", partial: "Partial" };
+const VERDICT_LABEL = { match: "Match", review: "Needs Review", mismatch: "Mismatch", no_data: "Not Checked", partial: "Partial", unreadable: "Unreadable" };
 
 function badge(verdict) {
   return `<span class="badge ${verdict}">${VERDICT_LABEL[verdict] || verdict}</span>`;
@@ -22,12 +22,17 @@ function overallBadgeText(overall) {
     mismatch: "Mismatch found",
     no_data: "No application data provided",
     partial: "Checked fields match — some fields had no application data to compare",
+    unreadable: "Photo quality too low to verify — retake and re-check",
   }[overall] || overall;
 }
 
 function renderFieldRow(key, field) {
-  const issues = field.issues && field.issues.length
-    ? `<ul class="issues">${field.issues.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>`
+  let issuesList = field.issues || [];
+  if (field.verdict === "unreadable" && !issuesList.length) {
+    issuesList = ["Not clearly visible on this photo -- retake and re-verify manually."];
+  }
+  const issues = issuesList.length
+    ? `<ul class="issues">${issuesList.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>`
     : "";
   const sim = field.similarity !== null && field.similarity !== undefined
     ? `<span class="meta">similarity ${(field.similarity * 100).toFixed(0)}%</span>` : "";
@@ -51,6 +56,10 @@ function renderResultCard(result) {
   }
   const fieldsHtml = Object.entries(result.fields).map(([k, f]) => renderFieldRow(k, f)).join("");
   const qualityNote = result.image_quality_notes ? ` &middot; image quality: ${escapeHtml(result.image_quality_notes)}` : "";
+  const lowConfidence = typeof result.model_confidence === "number" && result.model_confidence < 0.6;
+  const qualityWarning = lowConfidence
+    ? `<div class="quality-warning">⚠ Low confidence read on this photo (${Math.round(result.model_confidence * 100)}%). Consider retaking it in better lighting, straight-on, before relying on these results.</div>`
+    : "";
   return `
     <div class="result-card">
       <div class="result-header">
@@ -60,6 +69,7 @@ function renderResultCard(result) {
         </div>
         ${badge(result.overall)} <span class="meta">${overallBadgeText(result.overall)}</span>
       </div>
+      ${qualityWarning}
       ${fieldsHtml}
     </div>`;
 }

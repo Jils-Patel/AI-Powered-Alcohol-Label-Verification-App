@@ -6,3 +6,4 @@ venv/
 uploads/*
 !uploads/.gitkeep
 .DS_Store
+screenshots/

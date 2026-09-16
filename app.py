@@ -2,6 +2,7 @@ import csv
 import io
 import os
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
@@ -86,20 +87,37 @@ def api_verify_batch():
         except Exception as exc:  # noqa: BLE001
             return jsonify({"error": f"Could not parse manifest CSV: {exc}"}), 400
 
-    results = []
-    for image in images:
-        path = None
+    # Save uploads up front (cheap, must happen on this thread), then run the
+    # slow part -- the vision API calls -- concurrently, since a real seasonal
+    # spike could mean dozens of labels and these calls are I/O-bound.
+    jobs = []  # (original_index, filename, saved_path or None, error or None)
+    for idx, image in enumerate(images):
         try:
-            declared = declared_by_filename.get(image.filename, {})
             path = _save_upload(image)
-            result = verify_label(path, declared)
-            result["filename"] = image.filename
-            results.append(result)
+            jobs.append((idx, image.filename, path, None))
         except Exception as exc:  # noqa: BLE001
-            results.append({"filename": image.filename, "error": str(exc)})
+            jobs.append((idx, image.filename, None, str(exc)))
+
+    results = [None] * len(jobs)
+
+    def _run(job):
+        idx, filename, path, save_error = job
+        if save_error:
+            return idx, {"filename": filename, "error": save_error}
+        try:
+            declared = declared_by_filename.get(filename, {})
+            result = verify_label(path, declared)
+            result["filename"] = filename
+            return idx, result
+        except Exception as exc:  # noqa: BLE001
+            return idx, {"filename": filename, "error": str(exc)}
         finally:
-            if path and os.path.exists(path):
+            if os.path.exists(path):
                 os.remove(path)
+
+    with ThreadPoolExecutor(max_workers=min(8, len(jobs))) as pool:
+        for idx, result in pool.map(_run, jobs):
+            results[idx] = result
 
     return jsonify({"results": results})
 

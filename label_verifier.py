@@ -21,7 +21,8 @@ import os
 import re
 import time
 
-from openai import OpenAI
+from openai import OpenAI, APIError, RateLimitError
+from PIL import Image, UnidentifiedImageError
 
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
@@ -71,6 +72,14 @@ that is not visible or not present on the label."""
 
 
 def _encode_image(path):
+    try:
+        with Image.open(path) as img:
+            img.verify()
+    except (UnidentifiedImageError, OSError):
+        raise ValueError(
+            "This file doesn't look like a valid image. Please upload a JPG, PNG, or WEBP photo of the label."
+        )
+
     mime, _ = mimetypes.guess_type(path)
     if mime is None:
         mime = "image/jpeg"
@@ -93,7 +102,7 @@ def extract_label_fields(image_path):
     mime, b64data = _encode_image(image_path)
     client = _get_client()
 
-    response = client.chat.completions.create(
+    request_kwargs = dict(
         model=MODEL,
         max_tokens=1024,
         response_format={"type": "json_object"},
@@ -110,6 +119,26 @@ def extract_label_fields(image_path):
             }
         ],
     )
+
+    # A batch spike can burst past per-minute rate limits even though each
+    # individual call is well within budget -- retry those transient failures
+    # with backoff instead of surfacing them as a "this label failed" error.
+    last_error = None
+    for attempt in range(3):
+        try:
+            response = client.chat.completions.create(**request_kwargs)
+            break
+        except RateLimitError as exc:
+            last_error = exc
+            time.sleep(1.5 * (attempt + 1))
+        except APIError:
+            raise ValueError(
+                "The verification service couldn't process this image. Please try a different photo."
+            )
+    else:
+        raise ValueError(
+            "The verification service is temporarily busy. Please retry this label in a moment."
+        ) from last_error
 
     raw_text = (response.choices[0].message.content or "").strip()
 
@@ -168,6 +197,17 @@ def compare_fields(extracted, declared):
                 "verdict": "no_data",
             }
             continue
+        if not found:
+            # The model couldn't read this field off the photo -- that's a photo-quality
+            # problem, not evidence the label is wrong, so don't call it a "mismatch".
+            results[field] = {
+                "label": FIELD_LABELS[field],
+                "extracted": found,
+                "expected": expected,
+                "similarity": 0.0,
+                "verdict": "unreadable",
+            }
+            continue
         ratio = _similarity(found or "", expected)
         results[field] = {
             "label": FIELD_LABELS[field],
@@ -186,13 +226,22 @@ def check_government_warning(extracted):
     label = FIELD_LABELS["government_warning"]
 
     if not text:
+        confidence = extracted.get("confidence")
+        # Low model confidence means the photo likely obscured the warning rather
+        # than it being genuinely absent from the label -- treat that as a "please
+        # verify manually" case, not an automatic compliance failure.
+        low_confidence = confidence is not None and confidence < 0.6
         return {
             "label": label,
             "extracted": None,
             "expected": REQUIRED_GOVERNMENT_WARNING,
             "similarity": 0.0,
-            "verdict": "mismatch",
-            "issues": ["No government warning statement detected on the label."],
+            "verdict": "unreadable" if low_confidence else "mismatch",
+            "issues": [
+                "Government warning not clearly visible on this photo -- retake and re-verify."
+                if low_confidence
+                else "No government warning statement detected on the label."
+            ],
         }
 
     issues = []
@@ -235,7 +284,7 @@ def verify_label(image_path, declared):
     verdicts = [r["verdict"] for r in field_results.values()]
     if "mismatch" in verdicts:
         overall = "mismatch"
-    elif "review" in verdicts:
+    elif "review" in verdicts or "unreadable" in verdicts:
         overall = "review"
     elif verdicts.count("no_data") == len(verdicts):
         overall = "no_data"

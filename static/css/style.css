@@ -134,6 +134,7 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: var(-
 .badge.mismatch { background: var(--red-bg); color: var(--red-fg); border-color: var(--red-border); }
 .badge.no_data { background: var(--gray-bg); color: var(--gray-fg); border-color: var(--gray-border); }
 .badge.partial { background: var(--green-bg); color: var(--green-fg); border-color: var(--green-border); }
+.badge.unreadable { background: var(--amber-bg); color: var(--amber-fg); border-color: var(--amber-border); }
 
 .field-row { border-top: 1px solid var(--border); padding: 12px 0; }
 .field-row:first-of-type { border-top: none; }
@@ -145,6 +146,7 @@ input[type="text"]:focus { outline: 2px solid var(--accent); border-color: var(-
 .issues { margin: 8px 0 0; padding-left: 18px; color: var(--red-fg); font-size: 0.88rem; }
 
 .error-box { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red-fg); padding: 14px 16px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; }
+.quality-warning { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber-fg); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-weight: 600; font-size: 0.9rem; }
 
 .batch-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
 .batch-table th, .batch-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
